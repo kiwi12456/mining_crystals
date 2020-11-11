@@ -31,6 +31,7 @@
    authors-forum-usernames:viir
 -}
 
+unload-station-name = BLACKHEART TRADING  NOW OPEN
 
 module BotEngineApp exposing
     ( State
