@@ -31,7 +31,6 @@
    authors-forum-usernames:viir
 -}
 
-
 module BotEngineApp exposing
     ( State
     , initState
