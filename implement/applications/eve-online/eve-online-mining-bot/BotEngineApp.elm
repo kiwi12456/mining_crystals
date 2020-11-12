@@ -88,7 +88,7 @@ import Regex
 -}
 defaultBotSettings : BotSettings
 defaultBotSettings =
-    { runAwayShieldHitpointsThresholdPercent = 0
+    { runAwayShieldHitpointsThresholdPercent = 10
     , unloadStationName = Nothing
     , unloadStructureName = Nothing
     , modulesToActivateAlways = []
