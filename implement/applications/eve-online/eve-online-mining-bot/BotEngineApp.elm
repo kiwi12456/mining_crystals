@@ -389,7 +389,7 @@ undockUsingStationWindow context =
 
 
 inSpaceWithOreHoldSelected : BotDecisionContext -> SeeUndockingComplete -> EveOnline.ParseUserInterface.InventoryWindow -> DecisionPathNode
-inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHoldSelected =
+Delay.after 2000 Millisecond inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHoldSelected =
     if seeUndockingComplete.shipUI |> shipUIIndicatesShipIsWarpingOrJumping then
         describeBranch "I see we are warping."
             ([ returnDronesToBay context.readingFromGameClient
@@ -424,7 +424,7 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
 
                         else
                             describeBranch ("The ore hold is not yet filled " ++ describeThresholdToUnload ++ ". Get more ore.")
-                                (Delay.after 2000 Millisecond case context.readingFromGameClient.targets |> List.head of
+                                (case context.readingFromGameClient.targets |> List.head of
                                     Nothing ->
                                         describeBranch "I see no locked target."
                                             (travelToMiningSiteAndLaunchDronesAndTargetAsteroid context)
