@@ -448,7 +448,8 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
                                                                 (
                                                                     [ Delay.sequence
                                                                             [ ( 0, Delay.Millisecond, clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule )
-                                                                            , ( 2000, Delay.Millisecond, Nothing )
+                                                                            , ( 2000, Delay.Millisecond, readShipUIModuleButtonTooltips context
+                                                                    |> Maybe.withDefault waitForProgressInGame )
                                                                             ]
                                                                     ]
                                                                 )
