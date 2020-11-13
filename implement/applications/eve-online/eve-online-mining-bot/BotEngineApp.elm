@@ -446,7 +446,7 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
                                                         Just inactiveModule ->
                                                             describeBranch "I see an inactive mining module. Activate it."
                                                                 (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule
-                                                                |> Delay.after 2000 Delay.Millisecond Nothing)
+                                                                >> Delay.after 2000 Delay.Millisecond Nothing)
                                                     )
                                                 )
                                 )
