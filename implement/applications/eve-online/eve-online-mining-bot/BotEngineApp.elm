@@ -390,7 +390,7 @@ undockUsingStationWindow context =
 
 inSpaceWithOreHoldSelected : BotDecisionContext -> SeeUndockingComplete -> EveOnline.ParseUserInterface.InventoryWindow -> DecisionPathNode
 inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHoldSelected =
-    Process.sleep 2000 |> if seeUndockingComplete.shipUI |> shipUIIndicatesShipIsWarpingOrJumping then
+    Process.sleep 10 |> if seeUndockingComplete.shipUI |> shipUIIndicatesShipIsWarpingOrJumping then
         describeBranch "I see we are warping."
             ([ returnDronesToBay context.readingFromGameClient
              , readShipUIModuleButtonTooltips context
