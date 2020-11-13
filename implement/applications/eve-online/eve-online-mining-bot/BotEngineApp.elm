@@ -447,8 +447,8 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
                                                             describeBranch "I see an inactive mining module. Activate it."
                                                                 (
                                                                     [ Delay.sequence
-                                                                            [ ( 0, Millisecond, clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule )
-                                                                            , ( 2000, Millisecond, Nothing )
+                                                                            [ ( 0, Delay.Millisecond, clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule )
+                                                                            , ( 2000, Delay.Millisecond, Nothing )
                                                                             ]
                                                                     ]
                                                                 )
