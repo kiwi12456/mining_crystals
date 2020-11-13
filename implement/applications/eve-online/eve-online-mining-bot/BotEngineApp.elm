@@ -445,14 +445,8 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
 
                                                         Just inactiveModule ->
                                                             describeBranch "I see an inactive mining module. Activate it."
-                                                                (
-                                                                    [ Delay.sequence
-                                                                            [ ( 0, Delay.Millisecond, clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule )
-                                                                            , ( 2000, Delay.Millisecond, readShipUIModuleButtonTooltips context
-                                                                    |> Maybe.withDefault waitForProgressInGame )
-                                                                            ]
-                                                                    ]
-                                                                )
+                                                                (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule
+                                                                |> Delay.after 2000 Millisecond )
                                                     )
                                                 )
                                 )
