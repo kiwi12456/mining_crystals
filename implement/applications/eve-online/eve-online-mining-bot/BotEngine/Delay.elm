@@ -1,4 +1,4 @@
-module Delay exposing
+module BotEngine.Delay exposing
     ( TimeUnit(..)
     , after
     , sequence, sequenceIf, withUnit
