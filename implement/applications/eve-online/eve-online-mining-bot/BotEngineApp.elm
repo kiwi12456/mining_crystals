@@ -401,7 +401,7 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
             )
 
     else
-        Delay.after 2000 Millisecond case context |> knownModulesToActivateAlways |> List.filter (Tuple.second >> .isActive >> Maybe.withDefault False >> not) |> List.head of
+        case context |> knownModulesToActivateAlways |> List.filter (Tuple.second >> .isActive >> Maybe.withDefault False >> not) |> List.head of
             Just ( inactiveModuleMatchingText, inactiveModule ) ->
                 describeBranch ("I see inactive module '" ++ inactiveModuleMatchingText ++ "' to activate always. Activate it.")
                     (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule)
@@ -445,7 +445,13 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
 
                                                         Just inactiveModule ->
                                                             describeBranch "I see an inactive mining module. Activate it."
-                                                                (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule)
+                                                                (
+                                                                    [ Delay.sequence
+                                                                            [ ( 0, Millisecond, clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule )
+                                                                            , ( 2000, Millisecond, Nothing )
+                                                                            ]
+                                                                    ]
+                                                                )
                                                     )
                                                 )
                                 )
