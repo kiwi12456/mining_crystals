@@ -390,7 +390,7 @@ undockUsingStationWindow context =
 
 inSpaceWithOreHoldSelected : BotDecisionContext -> SeeUndockingComplete -> EveOnline.ParseUserInterface.InventoryWindow -> DecisionPathNode
 inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHoldSelected =
-    if seeUndockingComplete.shipUI |> shipUIIndicatesShipIsWarpingOrJumping then
+    Process.sleep 2000 |> if seeUndockingComplete.shipUI |> shipUIIndicatesShipIsWarpingOrJumping then
         describeBranch "I see we are warping."
             ([ returnDronesToBay context.readingFromGameClient
              , readShipUIModuleButtonTooltips context
@@ -401,7 +401,7 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
             )
 
     else
-        case context |> Process.sleep 2000 |> knownModulesToActivateAlways |> List.filter (Tuple.second >> .isActive >> Maybe.withDefault False >> not) |> List.head of
+        case context |> knownModulesToActivateAlways |> List.filter (Tuple.second >> .isActive >> Maybe.withDefault False >> not) |> List.head of
             Just ( inactiveModuleMatchingText, inactiveModule ) ->
                 describeBranch ("I see inactive module '" ++ inactiveModuleMatchingText ++ "' to activate always. Activate it.")
                     (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule)
