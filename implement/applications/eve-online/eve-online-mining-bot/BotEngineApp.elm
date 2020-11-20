@@ -63,14 +63,14 @@ import Regex
 -}
 defaultBotSettings : BotSettings
 defaultBotSettings =
-    { runAwayShieldHitpointsThresholdPercent = 70
+    { runAwayShieldHitpointsThresholdPercent = 50
     , unloadStationName = Nothing
     , unloadStructureName = Nothing
     , modulesToActivateAlways = []
     , hideWhenNeutralInLocal = Nothing
     , targetingRange = 8000
     , miningModuleRange = 5000
-    , botStepDelayMilliseconds = 2000
+    , botStepDelayMilliseconds = 4000
     , oreHoldMaxPercent = 99
     , selectInstancePilotName = Nothing
     }
