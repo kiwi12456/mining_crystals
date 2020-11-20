@@ -413,11 +413,8 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
                                                     (case context |> knownMiningModules |> List.filter (.isActive >> Maybe.withDefault False >> not) |> List.head of
                                                         Nothing ->
                                                             describeBranch "All known mining modules are active."
-                                                                (readShipUIModuleButtonTooltips context
-                                                                    |> Maybe.withDefault
-                                                                        (launchDronesAndSendThemToMine context.readingFromGameClient
-                                                                            |> Maybe.withDefault waitForProgressInGame
-                                                                        )
+                                                                (launchDronesAndSendThemToMine context.readingFromGameClient
+                                                                    |> Maybe.withDefault waitForProgressInGame
                                                                 )
 
                                                         Just inactiveModule ->
