@@ -726,7 +726,7 @@ warpToMiningSite readingFromGameClient =
 
 runAway : BotDecisionContext -> DecisionPathNode
 runAway context =
-    dockToStationOrStructureWithMatchingName context.readingFromGameClient
+    dockToUnloadOre context.readingFromGameClient
 
 
 dockToUnloadOre : BotDecisionContext -> DecisionPathNode
@@ -777,7 +777,7 @@ launchDrones readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
@@ -823,7 +823,7 @@ launchDronesAndSendThemToMine readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
