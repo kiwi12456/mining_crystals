@@ -797,8 +797,7 @@ launchDronesAndSendThemToMine : ReadingFromGameClient -> Maybe DecisionPathNode
 launchDronesAndSendThemToMine readingFromGameClient =
     readingFromGameClient.dronesWindow
         |> Maybe.andThen
-            (describeBranch "testing"
-                (\dronesWindow ->
+            (\dronesWindow ->
                 case ( dronesWindow.droneGroupInBay, dronesWindow.droneGroupInLocalSpace ) of
                     ( Just droneGroupInBay, Just droneGroupInLocalSpace ) ->
                         let
@@ -837,9 +836,7 @@ launchDronesAndSendThemToMine readingFromGameClient =
 
                     _ ->
                         Nothing
-                )
             )
-            
 
 
 returnDronesToBay : ReadingFromGameClient -> Maybe DecisionPathNode
