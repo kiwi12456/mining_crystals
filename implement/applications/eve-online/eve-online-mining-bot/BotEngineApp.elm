@@ -248,7 +248,7 @@ returnDronesAndRunAwayIfHitpointsAreTooLow context shipUI =
         runAwayWithDescription =
             describeBranch
                 ("Shield hitpoints are at " ++ (shipUI.hitpointsPercent.shield |> String.fromInt) ++ "%. Run away.")
-                (runAway context)
+                (dockToUnloadOre context)
     in
     if shipUI.hitpointsPercent.shield < context.eventContext.appSettings.runAwayShieldHitpointsThresholdPercent then
         Just runAwayWithDescription
@@ -726,7 +726,7 @@ warpToMiningSite readingFromGameClient =
 
 runAway : BotDecisionContext -> DecisionPathNode
 runAway context =
-    dockToUnloadOre context.readingFromGameClient
+    dockToRandomStationOrStructure context.readingFromGameClient
 
 
 dockToUnloadOre : BotDecisionContext -> DecisionPathNode
@@ -777,7 +777,7 @@ launchDrones readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
@@ -823,7 +823,7 @@ launchDronesAndSendThemToMine readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
