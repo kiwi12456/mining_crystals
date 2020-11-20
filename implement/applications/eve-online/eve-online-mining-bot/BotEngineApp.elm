@@ -726,7 +726,7 @@ warpToMiningSite readingFromGameClient =
 
 runAway : BotDecisionContext -> DecisionPathNode
 runAway context =
-    dockToRandomStationOrStructure context.readingFromGameClient
+    dockToStationOrStructureWithMatchingName context.readingFromGameClient
 
 
 dockToUnloadOre : BotDecisionContext -> DecisionPathNode
