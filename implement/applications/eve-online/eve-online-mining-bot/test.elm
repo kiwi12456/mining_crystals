@@ -1,6 +1,6 @@
 {- Stephan Fuchs EVE Online mining bot version 2020-10-31
    Merge as described at https://forum.botengine.org/t/eve-online-request-suggestion/3663
-   Merged change to drones from app https://catalog.botengine.org/813JXDLhK6bgeVaG89ZiQrQ7eNxLLRgvx7b42a81dddd0e992a0d9db1fce92da2
+   Merged change to drones from app https://catalog.botengine.org/813iHfbf1q7yRneJPNzxGTWEZRtMHyitqxb42a81dddd0e992a0d9db1fce92da2
 -}
 {-
    app-catalog-tags:eve-online,mining
@@ -63,14 +63,14 @@ import Regex
 -}
 defaultBotSettings : BotSettings
 defaultBotSettings =
-    { runAwayShieldHitpointsThresholdPercent = 70
+    { runAwayShieldHitpointsThresholdPercent = 30
     , unloadStationName = Nothing
     , unloadStructureName = Nothing
     , modulesToActivateAlways = []
     , hideWhenNeutralInLocal = Nothing
     , targetingRange = 8000
     , miningModuleRange = 5000
-    , botStepDelayMilliseconds = 2000
+    , botStepDelayMilliseconds = 4000
     , oreHoldMaxPercent = 99
     , selectInstancePilotName = Nothing
     }
@@ -248,7 +248,7 @@ returnDronesAndRunAwayIfHitpointsAreTooLow context shipUI =
         runAwayWithDescription =
             describeBranch
                 ("Shield hitpoints are at " ++ (shipUI.hitpointsPercent.shield |> String.fromInt) ++ "%. Run away.")
-                (runAway context)
+                (dockToUnloadOre context)
     in
     if shipUI.hitpointsPercent.shield < context.eventContext.appSettings.runAwayShieldHitpointsThresholdPercent then
         Just runAwayWithDescription
@@ -720,11 +720,9 @@ warpToMiningSite : ReadingFromGameClient -> DecisionPathNode
 warpToMiningSite readingFromGameClient =
     readingFromGameClient
         |> useContextMenuCascadeOnListSurroundingsButton
-            (useMenuEntryWithTextContaining "asteroid belts"
+            (useMenuEntryWithTextContaining "location"
                 (useRandomMenuEntry
-                    (useMenuEntryWithTextContaining "Warp to Within"
-                        (useMenuEntryWithTextContaining "Within 0 m" menuCascadeCompleted)
-                    )
+                    (useMenuEntryWithTextContaining "Warp to Location Within 0 m" menuCascadeCompleted)
                 )
             )
 
@@ -782,7 +780,7 @@ launchDrones readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
@@ -828,7 +826,7 @@ launchDronesAndSendThemToMine readingFromGameClient =
                                 (describeBranch "Launch drones"
                                     (useContextMenuCascade
                                         ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
+                                        (useMenuEntryWithTextContaining "Launch drones" menuCascadeCompleted)
                                         readingFromGameClient
                                     )
                                 )
@@ -970,7 +968,7 @@ statusTextFromState context =
 
         describeSessionPerformance =
             [ ( "times unloaded", context.memory.timesUnloaded )
-            , ( "volume unloaded / m©ø", context.memory.volumeUnloadedCubicMeters )
+            , ( "volume unloaded / m¨Ï©ª", context.memory.volumeUnloadedCubicMeters )
             ]
                 |> List.map (\( metric, amount ) -> metric ++ ": " ++ (amount |> String.fromInt))
                 |> String.join ", "
