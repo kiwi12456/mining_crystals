@@ -1,6 +1,23 @@
-{- Stephan Fuchs EVE Online mining bot version 2020-10-31
-   Merge as described at https://forum.botengine.org/t/eve-online-request-suggestion/3663
-   Merged change to drones from app https://catalog.botengine.org/813JXDLhK6bgeVaG89ZiQrQ7eNxLLRgvx7b42a81dddd0e992a0d9db1fce92da2
+{- EVE Online mining bot version Enrico Du Bruyn 2020-11-27
+   The bot warps to an asteroid belt, mines there until the ore hold is full, and then docks at a station or structure to unload the ore. It then repeats this cycle until you stop it.
+   If no station name or structure name is given with the app-settings, the bot docks again at the station where it was last docked.
+   Setup instructions for the EVE Online client:
+   + Set the UI language to English.
+   + In Overview window, make asteroids visible.
+   + Set the Overview window to sort objects in space by distance with the nearest entry at the top.
+   + Open one inventory window.
+   + If you want to use drones for defense against rats, place them in the drone bay, and open the 'Drones' window.
+   ## Configuration Settings
+   All settings are optional; you only need them in case the defaults don't fit your use-case.
+   + `unload-station-name` : Name of a station to dock to when the ore hold is full.
+   + `unload-structure-name` : Name of a structure to dock to when the ore hold is full.
+   + `module-to-activate-always` : Text found in tooltips of ship modules that should always be active. For example: "shield hardener".
+   + `hide-when-neutral-in-local` : Should we hide when a neutral or hostile pilot appears in the local chat? The only supported values are `no` and `yes`.
+   When using more than one setting, start a new line for each setting in the text input field.
+   Here is an example of a complete settings string:
+   unload-station-name = Noghere VII - Moon 15
+   module-to-activate-always = shield hardener
+   module-to-activate-always = afterburner
 -}
 {-
    app-catalog-tags:eve-online,mining
@@ -56,6 +73,7 @@ import EveOnline.ParseUserInterface
         , getAllContainedDisplayTexts
         )
 import Regex
+import Set
 
 
 {-| Sources for the defaults:
@@ -409,21 +427,8 @@ inSpaceWithOreHoldSelected context seeUndockingComplete inventoryWindowWithOreHo
                                         -}
                                         unlockTargetsNotForMining context
                                             |> Maybe.withDefault
-                                                (describeBranch "I see a locked target."
-                                                    (case context |> knownMiningModules |> List.filter (.isActive >> Maybe.withDefault False >> not) |> List.head of
-                                                        Nothing ->
-                                                            describeBranch "All known mining modules are active."
-                                                                (readShipUIModuleButtonTooltips context
-                                                                    |> Maybe.withDefault
-                                                                        (launchDronesAndSendThemToMine context.readingFromGameClient
-                                                                            |> Maybe.withDefault waitForProgressInGame
-                                                                        )
-                                                                )
-
-                                                        Just inactiveModule ->
-                                                            describeBranch "I see an inactive mining module. Activate it."
-                                                                (clickModuleButtonButWaitIfClickedInPreviousStep context inactiveModule)
-                                                    )
+                                                (describeBranch "I see a locked target. Use Enricos function."
+                                                    (enrico_2020_11_27_use_mining_crystal context)
                                                 )
                                 )
 
@@ -795,52 +800,6 @@ launchDrones readingFromGameClient =
             )
 
 
-launchDronesAndSendThemToMine : ReadingFromGameClient -> Maybe DecisionPathNode
-launchDronesAndSendThemToMine readingFromGameClient =
-    readingFromGameClient.dronesWindow
-        |> Maybe.andThen
-            (\dronesWindow ->
-                case ( dronesWindow.droneGroupInBay, dronesWindow.droneGroupInLocalSpace ) of
-                    ( Just droneGroupInBay, Just droneGroupInLocalSpace ) ->
-                        let
-                            idlingDrones =
-                                droneGroupInLocalSpace.drones
-                                    |> List.filter (.uiNode >> .uiNode >> EveOnline.ParseUserInterface.getAllContainedDisplayTexts >> List.any (String.toLower >> String.contains "idle"))
-
-                            dronesInBayQuantity =
-                                droneGroupInBay.header.quantityFromTitle |> Maybe.withDefault 0
-
-                            dronesInLocalSpaceQuantity =
-                                droneGroupInLocalSpace.header.quantityFromTitle |> Maybe.withDefault 0
-                        in
-                        if 0 < (idlingDrones |> List.length) then
-                            Just
-                                (describeBranch "Send idling drone(s)"
-                                    (useContextMenuCascade
-                                        ( "drones group", droneGroupInLocalSpace.header.uiNode )
-                                        (useMenuEntryWithTextContaining "mine" menuCascadeCompleted)
-                                        readingFromGameClient
-                                    )
-                                )
-
-                        else if 0 < dronesInBayQuantity && dronesInLocalSpaceQuantity < 5 then
-                            Just
-                                (describeBranch "Launch drones"
-                                    (useContextMenuCascade
-                                        ( "drones group", droneGroupInBay.header.uiNode )
-                                        (useMenuEntryWithTextContaining "Launch drone" menuCascadeCompleted)
-                                        readingFromGameClient
-                                    )
-                                )
-
-                        else
-                            Nothing
-
-                    _ ->
-                        Nothing
-            )
-
-
 returnDronesToBay : ReadingFromGameClient -> Maybe DecisionPathNode
 returnDronesToBay readingFromGameClient =
     readingFromGameClient.dronesWindow
@@ -970,7 +929,7 @@ statusTextFromState context =
 
         describeSessionPerformance =
             [ ( "times unloaded", context.memory.timesUnloaded )
-            , ( "volume unloaded / m©ø", context.memory.volumeUnloadedCubicMeters )
+            , ( "volume unloaded / m³", context.memory.volumeUnloadedCubicMeters )
             ]
                 |> List.map (\( metric, amount ) -> metric ++ ": " ++ (amount |> String.fromInt))
                 |> String.join ", "
@@ -1203,3 +1162,92 @@ shipManeuverIsApproaching =
         >> Maybe.map ((==) EveOnline.ParseUserInterface.ManeuverApproach)
         -- If the ship is just floating in space, there might be no indication displayed.
         >> Maybe.withDefault False
+
+
+
+{-
+   Function from https://forum.botengine.org/t/change-mining-crystals/3681/8?u=viir:
+      if (we have not any locked target)
+      then
+        Lock new target
+      else
+        if (there is an active ship module)
+        then
+           deactivate that ship module
+        else
+           if (there is a ship module with a tooltip text matching the text from the active target)
+           then
+              activate that module
+           else
+              Use context menu cascade: On one of the mining modules. Select menu entry containing one of the display strings in the selected target.
+-}
+
+
+enrico_2020_11_27_use_mining_crystal : BotDecisionContext -> DecisionPathNode
+enrico_2020_11_27_use_mining_crystal context =
+    case context.readingFromGameClient.targets |> List.filter .isActiveTarget |> List.head of
+        Nothing ->
+            describeBranch "I see no active target."
+                (travelToMiningSiteAndLaunchDronesAndTargetAsteroid context)
+
+        Just activeTarget ->
+            let
+                wordsInActiveTarget =
+                    activeTarget.uiNode.uiNode
+                        |> getAllContainedDisplayTexts
+                        |> List.concatMap String.words
+
+                moduleTooltipTextMatchesActiveTarget moduleTooltip =
+                    moduleTooltip.uiNode.uiNode
+                        |> getAllContainedDisplayTexts
+                        |> List.map String.toLower
+                        |> Set.fromList
+                        |> Set.intersect (wordsInActiveTarget |> List.map String.toLower |> Set.fromList)
+                        |> Set.isEmpty
+                        |> not
+
+                shipModuleButtonTooltipTextMatchesTextFromActiveTarget =
+                    EveOnline.AppFramework.getModuleButtonTooltipFromModuleButton context.memory.shipModules
+                        >> Maybe.map moduleTooltipTextMatchesActiveTarget
+            in
+            case
+                context
+                    |> knownMiningModules
+                    |> List.filter (.isActive >> Maybe.withDefault False)
+                    |> List.head
+            of
+                Just activeModule ->
+                    describeBranch "I see an active mining module. Deactivate it."
+                        (clickModuleButtonButWaitIfClickedInPreviousStep context activeModule)
+
+                Nothing ->
+                    case
+                        context
+                            |> knownMiningModules
+                            |> List.filter (shipModuleButtonTooltipTextMatchesTextFromActiveTarget >> Maybe.withDefault False)
+                            |> List.head
+                    of
+                        Just matchingModule ->
+                            describeBranch "there is a ship module with a tooltip text matching the text from the active target"
+                                (clickModuleButtonButWaitIfClickedInPreviousStep context matchingModule)
+
+                        Nothing ->
+                            describeBranch "there is no ship module with a tooltip text matching the text from the active target"
+                                (case
+                                    context
+                                        |> knownMiningModules
+                                        |> List.filter (shipModuleButtonTooltipTextMatchesTextFromActiveTarget >> Maybe.withDefault False)
+                                        |> List.head
+                                 of
+                                    Just miningModule ->
+                                        useContextMenuCascade
+                                            ( "ship module button", miningModule.uiNode )
+                                            (useMenuEntryWithTextContainingFirstOf wordsInActiveTarget menuCascadeCompleted)
+                                            context.readingFromGameClient
+
+                                    Nothing ->
+                                        describeBranch "No mining modules"
+                                            (readShipUIModuleButtonTooltips context
+                                                |> Maybe.withDefault waitForProgressInGame
+                                            )
+                                )
